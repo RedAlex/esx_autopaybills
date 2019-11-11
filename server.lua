@@ -32,7 +32,7 @@ function PayBills(d, h, m)
 							TriggerEvent('esx_addonaccount:getSharedAccount', result[i].target, function(account)
 								account.addMoney(result[i].amount)
 							end)
-							MySQL.Sync.execute('DELETE FROM billing WHERE `id = @id',
+							MySQL.Sync.execute('DELETE FROM billing WHERE id = @id',
 							{
 								['@id'] = result[i].id
 							})
