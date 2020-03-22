@@ -1,9 +1,7 @@
 
 # Esx Auto Pay Bills
 
-This ressource will check all morning if police/ambulance bills are unpay.
-If you have a bill, 10% of your bank account money are remove to be pay in the bill.
-You can also activate society gouv invest.
+This resource will check every morning if police/ambulance bills are unpaid. If you have a bill, 10% of your bank account money is withdrawn to pay the the bill. You can also activate a government grant.
 
 # Installation
 1. Download the .Zip from this repository.
