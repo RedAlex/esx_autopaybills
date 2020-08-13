@@ -53,15 +53,17 @@ function PayBills(d, h, m)
 						
 					end
 				else -- pay rent either way
-					MySQL.Async.fetchScalar('SELECT bank FROM users WHERE identifier = @identifier', 
+					MySQL.Async.fetchScalar('SELECT accounts FROM users WHERE identifier = @identifier', 
 					{
 						['@identifier'] = result[i].identifier
-					}, function(bankmoney)
-						if bankmoney > 0 then
-							if math.floor(bankmoney/100*Config.MaxPercentPay) >= result[i].amount then
-								MySQL.Sync.execute('UPDATE users SET bank = bank - @bank WHERE identifier = @identifier',
+					}, function(jsonAccounts)
+						local accounts = json.decode(jsonAccounts)
+						if accounts.bank > 0 then
+							if math.floor(accounts.bank/100*Config.MaxPercentPay) >= result[i].amount then
+								accounts.bank = accounts.bank - result[i].amount
+								MySQL.Sync.execute('UPDATE users SET accounts = @accounts WHERE identifier = @identifier',
 								{
-									['@bank']       = result[i].amount,
+									['@accounts']   = json.encode(accounts),
 									['@identifier'] = result[i].identifier
 								})
 								TriggerEvent('esx_addonaccount:getSharedAccount', result[i].target, function(account)
@@ -73,17 +75,18 @@ function PayBills(d, h, m)
 								})
 								print(result[i].identifier.." a payer "..(result[i].amount).." d'une factures due a "..result[i].target)
 							else
-								MySQL.Sync.execute('UPDATE users SET bank = bank - @bank WHERE identifier = @identifier',
+								accounts.bank = accounts.bank - math.floor(accounts.bank/100*Config.MaxPercentPay)
+								MySQL.Sync.execute('UPDATE users SET accounts = @accounts WHERE identifier = @identifier',
 								{
-									['@bank']       = math.floor(bankmoney/100*Config.MaxPercentPay),
+									['@accounts']   = json.encode(accounts),
 									['@identifier'] = result[i].identifier
 								})
 								MySQL.Sync.execute('UPDATE billing SET amount = amount - @amount WHERE id = @id',
 								{
-									['@amount']       = math.floor(bankmoney/100*Config.MaxPercentPay),
+									['@amount']       = math.floor(accounts.bank/100*Config.MaxPercentPay),
 									['@id'] = result[i].id
 								})
-								print(result[i].identifier.." a payer "..(math.floor(bankmoney/100*Config.MaxPercentPay)).." d'une factures due a "..result[i].target)
+								print(result[i].identifier.." a payer "..(math.floor(accounts.bank/100*Config.MaxPercentPay)).." d'une factures due a "..result[i].target)
 							end
 						end
 					end)
